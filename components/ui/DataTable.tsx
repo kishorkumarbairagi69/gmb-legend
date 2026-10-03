@@ -27,8 +27,8 @@ export function DataTable<T>({
       className={`w-full overflow-hidden rounded-2xl border border-border bg-white shadow-card ${className}`}
     >
       <div className="w-full overflow-x-auto">
-        <table className="w-full min-w-[640px] border-collapse">
-          <thead>
+<table className="w-full border-collapse">
+              <thead>
             <tr className="border-b border-border bg-secondary/60">
               {columns.map((column) => (
                 <th
