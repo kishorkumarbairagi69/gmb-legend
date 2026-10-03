@@ -1,21 +1,21 @@
 import { AreaChart } from "@/components/charts/AreaChart";
 import { AppShell } from "@/components/layout/AppShell";
+import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";
 import { KPICard } from "@/components/ui/KPICard";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { ProgressRing } from "@/components/ui/ProgressRing";
 import { TrendBadge } from "@/components/ui/TrendBadge";
 import {
+  AlertTriangle,
   Building2,
+  CheckCircle2,
   Eye,
+  ListChecks,
+  Map,
   MessageSquare,
   ShieldCheck,
   Star,
 } from "lucide-react";
-
-import {
-  DataTable,
-  type DataTableColumn,
-} from "@/components/ui/DataTable";
 
 const dashboardKpis = [
   {
@@ -144,6 +144,64 @@ const rankingColumns: DataTableColumn<RankingRow>[] = [
     key: "visibility",
     header: "Visibility",
     render: (row) => row.visibility,
+  },
+];
+
+const directoryData = [
+  {
+    name: "Google Business Profile",
+    status: "Healthy",
+    consistency: 98,
+  },
+  {
+    name: "Bing Places",
+    status: "Healthy",
+    consistency: 94,
+  },
+  {
+    name: "Apple Business Connect",
+    status: "Needs Review",
+    consistency: 81,
+  },
+  {
+    name: "Yelp",
+    status: "Healthy",
+    consistency: 91,
+  },
+];
+
+const geoGridData = [
+  { label: "1 km", value: 92 },
+  { label: "2 km", value: 86 },
+  { label: "3 km", value: 78 },
+  { label: "4 km", value: 69 },
+  { label: "5 km", value: 61 },
+];
+
+const taskData = [
+  {
+    title: "Complete missing business hours",
+    location: "Downtown",
+    priority: "High",
+    type: "Profile",
+  },
+  {
+    title: "Add 5 new photos",
+    location: "North",
+    priority: "Medium",
+    type: "Media",
+  },
+  {
+    title: "Respond to recent reviews",
+    location: "South",
+    priority: "High",
+    type: "Reviews",
+  },
+  {
+    title: "Review category coverage",
+    location: "East",
+    priority: "Low",
+    type: "Profile",
   },
 ];
 
@@ -368,6 +426,197 @@ export default function DashboardPage() {
                 />
               </div>
             </section>
+          </section>
+
+          <section className="mt-6 grid gap-6 xl:grid-cols-3">
+            <section className="rounded-2xl border border-border bg-white p-5 shadow-card xl:col-span-2">
+              <div className="mb-5 flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-card-title text-text-primary">
+                    Directories
+                  </h2>
+
+                  <p className="text-secondary mt-1">
+                    Illustrative NAP consistency across connected
+                    directories.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 rounded-lg bg-green/10 px-2.5 py-1 text-table font-semibold text-green">
+                  <CheckCircle2 size={15} />
+                  <span>94% healthy</span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {directoryData.map((directory) => (
+                  <div
+                    key={directory.name}
+                    className="flex flex-col gap-3 rounded-xl bg-secondary/50 p-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-primary shadow-card">
+                        <Building2 size={18} />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="text-table font-semibold text-text-primary">
+                          {directory.name}
+                        </p>
+
+                        <p className="text-secondary mt-0.5">
+                          NAP consistency
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="w-32">
+                        <ProgressBar
+                          value={directory.consistency}
+                          showValue={false}
+                        />
+                      </div>
+
+                      <span
+                        className={
+                          directory.status === "Healthy"
+                            ? "text-table font-semibold text-green"
+                            : "text-table font-semibold text-orange"
+                        }
+                      >
+                        {directory.status}
+                      </span>
+
+                      <span className="w-10 text-right text-table font-semibold text-text-primary">
+                        {directory.consistency}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="rounded-2xl border border-border bg-white p-5 shadow-card">
+              <div className="mb-5 flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-card-title text-text-primary">
+                    Geo-Grid
+                  </h2>
+
+                  <p className="text-secondary mt-1">
+                    Illustrative visibility by search radius.
+                  </p>
+                </div>
+
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-light text-primary">
+                  <Map size={19} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-5 gap-2">
+                {geoGridData.map((cell) => (
+                  <div
+                    key={cell.label}
+                    className="flex flex-col items-center gap-2"
+                  >
+                    <div
+                      className={`flex h-16 w-full items-center justify-center rounded-xl text-table font-semibold ${
+                        cell.value >= 85
+                          ? "bg-primary text-white"
+                          : cell.value >= 70
+                            ? "bg-primary-light text-primary-dark"
+                            : "bg-secondary text-text-primary"
+                      }`}
+                    >
+                      {cell.value}
+                    </div>
+
+                    <span className="text-table text-text-secondary">
+                      {cell.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5 rounded-xl bg-secondary/60 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-table font-medium text-text-primary">
+                    Average visibility
+                  </span>
+
+                  <span className="text-card-title text-text-primary">
+                    77%
+                  </span>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section className="mt-6 rounded-2xl border border-border bg-white p-5 shadow-card">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-card-title text-text-primary">
+                  Tasks & Recommendations
+                </h2>
+
+                <p className="text-secondary mt-1">
+                  Illustrative actions requiring attention across locations.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 rounded-lg bg-primary-light px-2.5 py-1 text-table font-semibold text-primary">
+                <ListChecks size={15} />
+                <span>24 open tasks</span>
+              </div>
+            </div>
+
+            <div className="grid gap-3 lg:grid-cols-2">
+              {taskData.map((task) => (
+                <div
+                  key={task.title}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-border p-4"
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div
+                      className={
+                        task.priority === "High"
+                          ? "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red/10 text-red"
+                          : "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-text-secondary"
+                      }
+                    >
+                      {task.priority === "High" ? (
+                        <AlertTriangle size={18} />
+                      ) : (
+                        <CheckCircle2 size={18} />
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="text-table font-semibold text-text-primary">
+                        {task.title}
+                      </p>
+
+                      <p className="text-secondary mt-1">
+                        {task.location} · {task.type}
+                      </p>
+                    </div>
+                  </div>
+
+                  <span
+                    className={
+                      task.priority === "High"
+                        ? "shrink-0 rounded-lg bg-red/10 px-2.5 py-1 text-table font-semibold text-red"
+                        : task.priority === "Medium"
+                          ? "shrink-0 rounded-lg bg-orange/10 px-2.5 py-1 text-table font-semibold text-orange"
+                          : "shrink-0 rounded-lg bg-secondary px-2.5 py-1 text-table font-semibold text-text-secondary"
+                    }
+                  >
+                    {task.priority}
+                  </span>
+                </div>
+              ))}
+            </div>
           </section>
         </div>
       </main>
