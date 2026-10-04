@@ -2,6 +2,8 @@
 
 import {
   CalendarDays,
+  ChevronLeft,
+  ChevronRight,
   FileText,
   ImagePlus,
   MoreHorizontal,
@@ -25,6 +27,15 @@ type Post = {
   location: string;
   type: "Update" | "Offer" | "Event";
   date: string;
+  status: "Published" | "Scheduled" | "Draft";
+};
+type CalendarPost = {
+  id: string;
+  title: string;
+  location: string;
+  type: "Update" | "Offer" | "Event";
+  date: Date;
+  time: string;
   status: "Published" | "Scheduled" | "Draft";
 };
 
@@ -94,7 +105,7 @@ const initialPosts: Post[] = [
 const statusOptions = ["All", "Published", "Scheduled", "Draft"];
 
 export default function PostsPage() {
-const [posts] = useState(initialPosts);
+const [posts, setPosts] = useState(initialPosts);
 const [statusFilter, setStatusFilter] = useState("All");
 const [locationFilter, setLocationFilter] = useState("All Locations");
 const [search, setSearch] = useState("");
@@ -105,6 +116,184 @@ const [postType, setPostType] = useState<"Update" | "Offer" | "Event">(
 const [postLocation, setPostLocation] = useState("Downtown Central");
 const [postContent, setPostContent] = useState("");
 const [callToAction, setCallToAction] = useState("Learn more");
+const [scheduleDate, setScheduleDate] = useState("2026-06-20");
+const [scheduleTime, setScheduleTime] = useState("10:00");
+const [scheduleError, setScheduleError] = useState("");
+const [calendarView, setCalendarView] = useState<"week" | "month">("week");
+const [calendarDate, setCalendarDate] = useState(new Date(2026, 5, 18));
+const [calendarPosts, setCalendarPosts] = useState<CalendarPost[]>([
+      {
+    id: "calendar-001",
+    title: "Summer Service Update",
+    location: "Downtown Central",
+    type: "Update" as const,
+    date: new Date(2026, 5, 18),
+    time: "10:00 AM",
+    status: "Published" as const,
+  },
+  {
+    id: "calendar-002",
+    title: "Weekend Special Offer",
+    location: "Downtown North",
+    type: "Offer" as const,
+    date: new Date(2026, 5, 20),
+    time: "9:30 AM",
+    status: "Scheduled" as const,
+  },
+  {
+    id: "calendar-003",
+    title: "Customer Appreciation Event",
+    location: "Market Square",
+    type: "Event" as const,
+    date: new Date(2026, 5, 22),
+    time: "11:00 AM",
+    status: "Scheduled" as const,
+  },
+  {
+    id: "calendar-004",
+    title: "New Service Announcement",
+    location: "Downtown South",
+    type: "Update" as const,
+    date: new Date(2026, 5, 17),
+    time: "2:00 PM",
+    status: "Draft" as const,
+  },
+  {
+    id: "calendar-005",
+    title: "Local Business Spotlight",
+    location: "Downtown Central",
+    type: "Update" as const,
+    date: new Date(2026, 5, 15),
+    time: "4:00 PM",
+    status: "Published" as const,
+  },
+  {
+    id: "calendar-006",
+    title: "Midweek Promotion",
+    location: "Market Square",
+    type: "Offer" as const,
+    date: new Date(2026, 5, 12),
+    time: "12:30 PM",
+    status: "Published" as const,
+  },
+]);
+
+const calendarDays = Array.from({ length: 7 }, (_, index) => {
+  const day = new Date(calendarDate);
+  const dayOfWeek = day.getDay();
+  day.setDate(day.getDate() - dayOfWeek + index);
+  return day;
+});
+
+const monthDays = Array.from({ length: 35 }, (_, index) => {
+  const firstDay = new Date(
+    calendarDate.getFullYear(),
+    calendarDate.getMonth(),
+    1,
+  );
+
+  const startOffset = firstDay.getDay();
+  const day = new Date(firstDay);
+  day.setDate(1 - startOffset + index);
+
+  return day;
+});
+
+const formatCalendarDate = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+const formatMonthLabel = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+
+const isSameDay = (first: Date, second: Date) =>
+  first.getFullYear() === second.getFullYear() &&
+  first.getMonth() === second.getMonth() &&
+  first.getDate() === second.getDate();
+
+const getCalendarPosts = (date: Date) =>
+  calendarPosts.filter((post) => {
+    const matchesLocation =
+      locationFilter === "All Locations" ||
+      post.location === locationFilter;
+
+    const matchesStatus =
+      statusFilter === "All" || post.status === statusFilter;
+
+    return matchesLocation && matchesStatus && isSameDay(post.date, date);
+  });
+const handleSchedulePost = () => {
+  const trimmedContent = postContent.trim();
+
+  if (!trimmedContent) {
+    setScheduleError("Add post content before scheduling.");
+    return;
+  }
+
+  if (!scheduleDate) {
+    setScheduleError("Choose a schedule date.");
+    return;
+  }
+
+  if (!scheduleTime) {
+    setScheduleError("Choose a schedule time.");
+    return;
+  }
+
+  const scheduledDate = new Date(`${scheduleDate}T${scheduleTime}`);
+
+  if (Number.isNaN(scheduledDate.getTime())) {
+    setScheduleError("Choose a valid schedule date and time.");
+    return;
+  }
+
+  setScheduleError("");  const title =
+    trimmedContent.split(/\r?\n/)[0].trim().slice(0, 60) ||
+    `Scheduled ${postType}`;
+
+  const formattedDate = scheduledDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  const formattedTime = scheduledDate.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  const newPost: Post = {
+    id: `post-${Date.now()}`,
+    title,
+    content: trimmedContent,
+    location: postLocation,
+    type: postType,
+    date: formattedDate,
+    status: "Scheduled",
+  };
+
+  const newCalendarPost = {
+    id: `calendar-${Date.now()}`,
+    title,
+    location: postLocation,
+    type: postType,
+    date: scheduledDate,
+    time: formattedTime,
+    status: "Scheduled" as const,
+  };
+
+  setPosts((currentPosts) => [newPost, ...currentPosts]);
+  setCalendarPosts((currentPosts) => [newCalendarPost, ...currentPosts]);
+
+  setIsCreateOpen(false);
+  setPostContent("");
+};
   const locations = useMemo(
     () => [
       "All Locations",
@@ -333,6 +522,228 @@ const [callToAction, setCallToAction] = useState("Learn more");
             </div>
           </section>
 
+          <section className="surface-card overflow-hidden">
+            <div className="flex flex-col gap-4 border-b border-border p-5 xl:flex-row xl:items-center xl:justify-between">
+              <div>
+                <p className="text-sm font-medium text-text-secondary">
+                  Publishing Calendar
+                </p>
+                <h2 className="mt-1 text-lg font-semibold text-text-primary">
+                  {formatMonthLabel(calendarDate)}
+                </h2>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCalendarDate(
+                      new Date(
+                        calendarDate.getFullYear(),
+                        calendarDate.getMonth(),
+                        calendarDate.getDate() - 7,
+                      ),
+                    )
+                  }
+                  className="rounded-lg border border-border bg-white p-2 text-text-secondary transition hover:bg-secondary hover:text-text-primary"
+                  aria-label="Previous period"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCalendarDate(new Date(2026, 5, 18))}
+                  className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-text-primary transition hover:bg-secondary"
+                >
+                  Today
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCalendarDate(
+                      new Date(
+                        calendarDate.getFullYear(),
+                        calendarDate.getMonth(),
+                        calendarDate.getDate() + 7,
+                      ),
+                    )
+                  }
+                  className="rounded-lg border border-border bg-white p-2 text-text-secondary transition hover:bg-secondary hover:text-text-primary"
+                  aria-label="Next period"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+
+                <div className="ml-1 flex rounded-lg bg-secondary p-1">
+                  <button
+                    type="button"
+                    onClick={() => setCalendarView("week")}
+                    className={`rounded-md px-3 py-1.5 text-sm font-semibold transition ${
+                      calendarView === "week"
+                        ? "bg-white text-primary shadow-sm"
+                        : "text-text-secondary hover:text-text-primary"
+                    }`}
+                  >
+                    Week
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setCalendarView("month")}
+                    className={`rounded-md px-3 py-1.5 text-sm font-semibold transition ${
+                      calendarView === "month"
+                        ? "bg-white text-primary shadow-sm"
+                        : "text-text-secondary hover:text-text-primary"
+                    }`}
+                  >
+                    Month
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {calendarView === "week" ? (
+              <div className="grid grid-cols-1 divide-y divide-border md:grid-cols-7 md:divide-x md:divide-y-0">
+                {calendarDays.map((day) => {
+                  const dayPosts = getCalendarPosts(day);
+                  const isToday = isSameDay(day, new Date(2026, 5, 18));
+
+                  return (
+                    <div
+                      key={day.toISOString()}
+                      className="min-h-[230px] bg-white"
+                    >
+                      <div
+                        className={`border-b border-border px-3 py-3 ${
+                          isToday ? "bg-primary-light/60" : "bg-secondary/40"
+                        }`}
+                      >
+                        <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">
+                          {day.toLocaleDateString("en-US", {
+                            weekday: "short",
+                          })}
+                        </p>
+                        <p
+                          className={`mt-1 text-lg font-bold ${
+                            isToday
+                              ? "text-primary"
+                              : "text-text-primary"
+                          }`}
+                        >
+                          {day.getDate()}
+                        </p>
+                      </div>
+
+                      <div className="space-y-2 p-2">
+                        {dayPosts.length > 0 ? (
+                          dayPosts.map((post) => (
+                            <div
+                              key={post.id}
+                              className="rounded-xl border border-border bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <span className="text-[11px] font-semibold text-primary">
+                                  {post.type}
+                                </span>
+
+                                <StatusBadge
+                                  status={
+                                    post.status === "Published"
+                                      ? "success"
+                                      : post.status === "Scheduled"
+                                        ? "info"
+                                        : "neutral"
+                                  }
+                                >
+                                  {post.status}
+                                </StatusBadge>
+                              </div>
+
+                              <p className="mt-2 text-sm font-semibold leading-5 text-text-primary">
+                                {post.title}
+                              </p>
+
+                              <p className="mt-1 text-xs text-text-secondary">
+                                {post.time}
+                              </p>
+
+                              <p className="mt-2 truncate text-xs text-text-secondary">
+                                {post.location}
+                              </p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="flex min-h-[100px] items-center justify-center rounded-xl border border-dashed border-border bg-secondary/20 px-3 text-center">
+                            <p className="text-xs text-text-secondary">
+                              No posts
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 border-l border-t border-border sm:grid-cols-4 md:grid-cols-7">
+                {monthDays.map((day) => {
+                  const dayPosts = getCalendarPosts(day);
+                  const isCurrentMonth =
+                    day.getMonth() === calendarDate.getMonth();
+                  const isToday = isSameDay(day, new Date(2026, 5, 18));
+
+                  return (
+                    <div
+                      key={day.toISOString()}
+                      className={`min-h-[150px] border-b border-r border-border p-2 ${
+                        isCurrentMonth ? "bg-white" : "bg-secondary/30"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span
+                          className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
+                            isToday
+                              ? "bg-primary text-white"
+                              : isCurrentMonth
+                                ? "text-text-primary"
+                                : "text-text-secondary"
+                          }`}
+                        >
+                          {day.getDate()}
+                        </span>
+
+                        {dayPosts.length > 0 && (
+                          <span className="text-[10px] font-medium text-text-secondary">
+                            {dayPosts.length} post
+                            {dayPosts.length === 1 ? "" : "s"}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="mt-2 space-y-1.5">
+                        {dayPosts.map((post) => (
+                          <div
+                            key={post.id}
+                            className="rounded-lg border border-border bg-primary-light/50 px-2 py-1.5"
+                          >
+                            <p className="truncate text-[11px] font-semibold text-primary">
+                              {post.title}
+                            </p>
+                            <p className="truncate text-[10px] text-text-secondary">
+                              {post.time} · {post.location}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
           <section>
             <DataTable
               columns={columns}
@@ -341,7 +752,6 @@ const [callToAction, setCallToAction] = useState("Learn more");
               emptyMessage="No posts match the selected filters."
             />
           </section>
-
           <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="surface-card">
               <div className="flex items-start gap-4">
@@ -492,7 +902,12 @@ const [callToAction, setCallToAction] = useState("Learn more");
                   <textarea
                     id="post-content"
                     value={postContent}
-                    onChange={(event) => setPostContent(event.target.value)}
+                    onChange={(event) => {
+  setPostContent(event.target.value);
+  if (scheduleError) {
+    setScheduleError("");
+  }
+}}
                     placeholder="Write the content you want to publish..."
                     className="mt-2 min-h-44 w-full resize-y rounded-xl border border-border bg-white p-4 text-sm leading-6 text-text-primary outline-none placeholder:text-text-secondary focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
@@ -553,22 +968,94 @@ const [callToAction, setCallToAction] = useState("Learn more");
                     <option>None</option>
                   </select>
                 </section>
+<section className="rounded-2xl bg-secondary/60 p-4">
+  <div className="flex items-start gap-3">
+    <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
 
-                <section className="rounded-2xl bg-secondary/60 p-4">
-                  <div className="flex items-start gap-3">
-                    <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+    <div className="min-w-0 flex-1">
+      <p className="text-sm font-semibold text-text-primary">
+        Publishing options
+      </p>
 
-                    <div>
-                      <p className="text-sm font-semibold text-text-primary">
-                        Publishing options
-                      </p>
-                      <p className="mt-1 text-xs leading-5 text-text-secondary">
-                        You can save this post as a draft, schedule it for
-                        later, or publish it immediately.
-                      </p>
-                    </div>
-                  </div>
-                </section>
+      <p className="mt-1 text-xs leading-5 text-text-secondary">
+        Choose when this post should be published. Scheduling is
+        currently a frontend preview.
+      </p>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div>
+          <label
+            htmlFor="schedule-date"
+            className="text-xs font-semibold text-text-primary"
+          >
+            Schedule Date
+          </label>
+
+          <input
+            id="schedule-date"
+            type="date"
+            value={scheduleDate}
+            onChange={(event) => {
+  setScheduleDate(event.target.value);
+  if (scheduleError) {
+    setScheduleError("");
+  }
+}}
+            className="mt-2 h-11 w-full rounded-xl border border-border bg-white px-3 text-sm text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="schedule-time"
+            className="text-xs font-semibold text-text-primary"
+          >
+            Schedule Time
+          </label>
+
+          <input
+            id="schedule-time"
+            type="time"
+            value={scheduleTime}
+onChange={(event) => {
+  setScheduleTime(event.target.value);
+  if (scheduleError) {
+    setScheduleError("");
+  }
+}}            className="mt-2 h-11 w-full rounded-xl border border-border bg-white px-3 text-sm text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+          />
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-xl border border-primary/10 bg-primary-light/50 px-3 py-2.5">
+        <p className="text-xs font-medium text-text-secondary">
+          Scheduled for
+        </p>
+
+        <p className="mt-1 text-sm font-semibold text-primary">
+          {new Date(`${scheduleDate}T${scheduleTime}`).toLocaleString(
+            "en-US",
+            {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+            },
+          )}
+        </p>
+      </div>
+    </div>
+  </div>
+  {scheduleError && (
+  <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5">
+    <p className="text-xs font-medium text-red-600">
+      {scheduleError}
+    </p>
+  </div>
+)}
+</section>
               </div>
             </div>
 
@@ -591,14 +1078,13 @@ const [callToAction, setCallToAction] = useState("Learn more");
                     Save Draft
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setIsCreateOpen(false)}
-                    className="rounded-xl border border-primary bg-white px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary-light"
-                  >
-                    Schedule
-                  </button>
-
+<button
+  type="button"
+  onClick={handleSchedulePost}
+  className="rounded-xl border border-primary bg-white px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary-light"
+>
+  Schedule
+</button>
                   <button
                     type="button"
                     onClick={() => setIsCreateOpen(false)}
