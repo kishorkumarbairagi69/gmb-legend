@@ -29,6 +29,7 @@ type Post = {
   date: string;
   status: "Published" | "Scheduled" | "Draft";
 };
+
 type CalendarPost = {
   id: string;
   title: string;
@@ -105,195 +106,214 @@ const initialPosts: Post[] = [
 const statusOptions = ["All", "Published", "Scheduled", "Draft"];
 
 export default function PostsPage() {
-const [posts, setPosts] = useState(initialPosts);
-const [statusFilter, setStatusFilter] = useState("All");
-const [locationFilter, setLocationFilter] = useState("All Locations");
-const [search, setSearch] = useState("");
-const [isCreateOpen, setIsCreateOpen] = useState(false);
-const [postType, setPostType] = useState<"Update" | "Offer" | "Event">(
-  "Update",
-);
-const [postLocation, setPostLocation] = useState("Downtown Central");
-const [postContent, setPostContent] = useState("");
-const [callToAction, setCallToAction] = useState("Learn more");
-const [scheduleDate, setScheduleDate] = useState("2026-06-20");
-const [scheduleTime, setScheduleTime] = useState("10:00");
-const [scheduleError, setScheduleError] = useState("");
-const [calendarView, setCalendarView] = useState<"week" | "month">("week");
-const [calendarDate, setCalendarDate] = useState(new Date(2026, 5, 18));
-const [calendarPosts, setCalendarPosts] = useState<CalendarPost[]>([
-      {
-    id: "calendar-001",
-    title: "Summer Service Update",
-    location: "Downtown Central",
-    type: "Update" as const,
-    date: new Date(2026, 5, 18),
-    time: "10:00 AM",
-    status: "Published" as const,
-  },
-  {
-    id: "calendar-002",
-    title: "Weekend Special Offer",
-    location: "Downtown North",
-    type: "Offer" as const,
-    date: new Date(2026, 5, 20),
-    time: "9:30 AM",
-    status: "Scheduled" as const,
-  },
-  {
-    id: "calendar-003",
-    title: "Customer Appreciation Event",
-    location: "Market Square",
-    type: "Event" as const,
-    date: new Date(2026, 5, 22),
-    time: "11:00 AM",
-    status: "Scheduled" as const,
-  },
-  {
-    id: "calendar-004",
-    title: "New Service Announcement",
-    location: "Downtown South",
-    type: "Update" as const,
-    date: new Date(2026, 5, 17),
-    time: "2:00 PM",
-    status: "Draft" as const,
-  },
-  {
-    id: "calendar-005",
-    title: "Local Business Spotlight",
-    location: "Downtown Central",
-    type: "Update" as const,
-    date: new Date(2026, 5, 15),
-    time: "4:00 PM",
-    status: "Published" as const,
-  },
-  {
-    id: "calendar-006",
-    title: "Midweek Promotion",
-    location: "Market Square",
-    type: "Offer" as const,
-    date: new Date(2026, 5, 12),
-    time: "12:30 PM",
-    status: "Published" as const,
-  },
-]);
-
-const calendarDays = Array.from({ length: 7 }, (_, index) => {
-  const day = new Date(calendarDate);
-  const dayOfWeek = day.getDay();
-  day.setDate(day.getDate() - dayOfWeek + index);
-  return day;
-});
-
-const monthDays = Array.from({ length: 35 }, (_, index) => {
-  const firstDay = new Date(
-    calendarDate.getFullYear(),
-    calendarDate.getMonth(),
-    1,
+  const [posts, setPosts] = useState(initialPosts);
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [locationFilter, setLocationFilter] = useState("All Locations");
+  const [search, setSearch] = useState("");
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [postType, setPostType] = useState<"Update" | "Offer" | "Event">(
+    "Update",
   );
+  const [postLocation, setPostLocation] = useState("Downtown Central");
+  const [postContent, setPostContent] = useState("");
+  const [callToAction, setCallToAction] = useState("Learn more");
+  const [scheduleDate, setScheduleDate] = useState("2026-06-20");
+  const [scheduleTime, setScheduleTime] = useState("10:00");
+  const [scheduleError, setScheduleError] = useState("");
+  const [isSchedulePreviewOpen, setIsSchedulePreviewOpen] = useState(false);
+  const [calendarView, setCalendarView] = useState<"week" | "month">("week");
+  const [calendarDate, setCalendarDate] = useState(new Date(2026, 5, 18));
 
-  const startOffset = firstDay.getDay();
-  const day = new Date(firstDay);
-  day.setDate(1 - startOffset + index);
+  const [calendarPosts, setCalendarPosts] = useState<CalendarPost[]>([
+    {
+      id: "calendar-001",
+      title: "Summer Service Update",
+      location: "Downtown Central",
+      type: "Update",
+      date: new Date(2026, 5, 18),
+      time: "10:00 AM",
+      status: "Published",
+    },
+    {
+      id: "calendar-002",
+      title: "Weekend Special Offer",
+      location: "Downtown North",
+      type: "Offer",
+      date: new Date(2026, 5, 20),
+      time: "9:30 AM",
+      status: "Scheduled",
+    },
+    {
+      id: "calendar-003",
+      title: "Customer Appreciation Event",
+      location: "Market Square",
+      type: "Event",
+      date: new Date(2026, 5, 22),
+      time: "11:00 AM",
+      status: "Scheduled",
+    },
+    {
+      id: "calendar-004",
+      title: "New Service Announcement",
+      location: "Downtown South",
+      type: "Update",
+      date: new Date(2026, 5, 17),
+      time: "2:00 PM",
+      status: "Draft",
+    },
+    {
+      id: "calendar-005",
+      title: "Local Business Spotlight",
+      location: "Downtown Central",
+      type: "Update",
+      date: new Date(2026, 5, 15),
+      time: "4:00 PM",
+      status: "Published",
+    },
+    {
+      id: "calendar-006",
+      title: "Midweek Promotion",
+      location: "Market Square",
+      type: "Offer",
+      date: new Date(2026, 5, 12),
+      time: "12:30 PM",
+      status: "Published",
+    },
+  ]);
 
-  return day;
-});
-
-const formatCalendarDate = (date: Date) =>
-  date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+  const calendarDays = Array.from({ length: 7 }, (_, index) => {
+    const day = new Date(calendarDate);
+    const dayOfWeek = day.getDay();
+    day.setDate(day.getDate() - dayOfWeek + index);
+    return day;
   });
 
-const formatMonthLabel = (date: Date) =>
-  date.toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
+  const monthDays = Array.from({ length: 35 }, (_, index) => {
+    const firstDay = new Date(
+      calendarDate.getFullYear(),
+      calendarDate.getMonth(),
+      1,
+    );
+
+    const startOffset = firstDay.getDay();
+    const day = new Date(firstDay);
+    day.setDate(1 - startOffset + index);
+
+    return day;
   });
 
-const isSameDay = (first: Date, second: Date) =>
-  first.getFullYear() === second.getFullYear() &&
-  first.getMonth() === second.getMonth() &&
-  first.getDate() === second.getDate();
+  const formatCalendarDate = (date: Date) =>
+    date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
 
-const getCalendarPosts = (date: Date) =>
-  calendarPosts.filter((post) => {
-    const matchesLocation =
-      locationFilter === "All Locations" ||
-      post.location === locationFilter;
+  const formatMonthLabel = (date: Date) =>
+    date.toLocaleDateString("en-US", {
+      month: "long",
+      year: "numeric",
+    });
 
-    const matchesStatus =
-      statusFilter === "All" || post.status === statusFilter;
+  const isSameDay = (first: Date, second: Date) =>
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate();
 
-    return matchesLocation && matchesStatus && isSameDay(post.date, date);
-  });
-const handleSchedulePost = () => {
-  const trimmedContent = postContent.trim();
+  const getCalendarPosts = (date: Date) =>
+    calendarPosts.filter((post) => {
+      const matchesLocation =
+        locationFilter === "All Locations" ||
+        post.location === locationFilter;
 
-  if (!trimmedContent) {
-    setScheduleError("Add post content before scheduling.");
-    return;
-  }
+      const matchesStatus =
+        statusFilter === "All" || post.status === statusFilter;
 
-  if (!scheduleDate) {
-    setScheduleError("Choose a schedule date.");
-    return;
-  }
+      return matchesLocation && matchesStatus && isSameDay(post.date, date);
+    });
 
-  if (!scheduleTime) {
-    setScheduleError("Choose a schedule time.");
-    return;
-  }
+  const handleSchedulePost = () => {
+    setScheduleError("");
 
-  const scheduledDate = new Date(`${scheduleDate}T${scheduleTime}`);
+    const trimmedContent = postContent.trim();
 
-  if (Number.isNaN(scheduledDate.getTime())) {
-    setScheduleError("Choose a valid schedule date and time.");
-    return;
-  }
+    if (!trimmedContent) {
+      setScheduleError("Add post content before scheduling.");
+      return;
+    }
 
-  setScheduleError("");  const title =
-    trimmedContent.split(/\r?\n/)[0].trim().slice(0, 60) ||
-    `Scheduled ${postType}`;
+    if (!scheduleDate) {
+      setScheduleError("Choose a schedule date.");
+      return;
+    }
 
-  const formattedDate = scheduledDate.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+    if (!scheduleTime) {
+      setScheduleError("Choose a schedule time.");
+      return;
+    }
 
-  const formattedTime = scheduledDate.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+    const scheduledDate = new Date(`${scheduleDate}T${scheduleTime}`);
 
-  const newPost: Post = {
-    id: `post-${Date.now()}`,
-    title,
-    content: trimmedContent,
-    location: postLocation,
-    type: postType,
-    date: formattedDate,
-    status: "Scheduled",
+    if (Number.isNaN(scheduledDate.getTime())) {
+      setScheduleError("Choose a valid schedule date and time.");
+      return;
+    }
+
+    setIsSchedulePreviewOpen(true);
   };
 
-  const newCalendarPost = {
-    id: `calendar-${Date.now()}`,
-    title,
-    location: postLocation,
-    type: postType,
-    date: scheduledDate,
-    time: formattedTime,
-    status: "Scheduled" as const,
+  const handleConfirmSchedule = () => {
+    const trimmedContent = postContent.trim();
+    const scheduledDate = new Date(`${scheduleDate}T${scheduleTime}`);
+
+    if (!trimmedContent || Number.isNaN(scheduledDate.getTime())) {
+      setIsSchedulePreviewOpen(false);
+      return;
+    }
+
+    const title =
+      trimmedContent.split(/\r?\n/)[0].trim().slice(0, 60) ||
+      `Scheduled ${postType}`;
+
+    const formattedDate = scheduledDate.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    const formattedTime = scheduledDate.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+
+    const newPost: Post = {
+      id: `post-${Date.now()}`,
+      title,
+      content: trimmedContent,
+      location: postLocation,
+      type: postType,
+      date: formattedDate,
+      status: "Scheduled",
+    };
+
+    const newCalendarPost: CalendarPost = {
+      id: `calendar-${Date.now()}`,
+      title,
+      location: postLocation,
+      type: postType,
+      date: scheduledDate,
+      time: formattedTime,
+      status: "Scheduled",
+    };
+
+    setPosts((currentPosts) => [newPost, ...currentPosts]);
+    setCalendarPosts((currentPosts) => [newCalendarPost, ...currentPosts]);
+
+    setIsSchedulePreviewOpen(false);
+    setIsCreateOpen(false);
+    setPostContent("");
   };
 
-  setPosts((currentPosts) => [newPost, ...currentPosts]);
-  setCalendarPosts((currentPosts) => [newCalendarPost, ...currentPosts]);
-
-  setIsCreateOpen(false);
-  setPostContent("");
-};
   const locations = useMemo(
     () => [
       "All Locations",
@@ -424,11 +444,11 @@ const handleSchedulePost = () => {
               </p>
             </div>
 
-           <button
-  type="button"
-  onClick={() => setIsCreateOpen(true)}
-  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark"
->
+            <button
+              type="button"
+              onClick={() => setIsCreateOpen(true)}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark"
+            >
               <Plus className="h-4 w-4" />
               Create Post
             </button>
@@ -470,6 +490,7 @@ const handleSchedulePost = () => {
                 <h2 className="text-lg font-semibold text-text-primary">
                   All Posts
                 </h2>
+
                 <p className="mt-1 text-sm text-text-secondary">
                   Review publishing activity and manage content across your
                   locations.
@@ -479,6 +500,7 @@ const handleSchedulePost = () => {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <div className="flex h-10 min-w-[240px] items-center gap-2 rounded-full border border-border bg-white px-4 shadow-sm">
                   <Search className="h-4 w-4 text-text-secondary" />
+
                   <input
                     type="text"
                     value={search}
@@ -528,6 +550,7 @@ const handleSchedulePost = () => {
                 <p className="text-sm font-medium text-text-secondary">
                   Publishing Calendar
                 </p>
+
                 <h2 className="mt-1 text-lg font-semibold text-text-primary">
                   {formatMonthLabel(calendarDate)}
                 </h2>
@@ -625,11 +648,10 @@ const handleSchedulePost = () => {
                             weekday: "short",
                           })}
                         </p>
+
                         <p
                           className={`mt-1 text-lg font-bold ${
-                            isToday
-                              ? "text-primary"
-                              : "text-text-primary"
+                            isToday ? "text-primary" : "text-text-primary"
                           }`}
                         >
                           {day.getDate()}
@@ -731,6 +753,7 @@ const handleSchedulePost = () => {
                             <p className="truncate text-[11px] font-semibold text-primary">
                               {post.title}
                             </p>
+
                             <p className="truncate text-[10px] text-text-secondary">
                               {post.time} · {post.location}
                             </p>
@@ -752,16 +775,19 @@ const handleSchedulePost = () => {
               emptyMessage="No posts match the selected filters."
             />
           </section>
+
           <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="surface-card">
               <div className="flex items-start gap-4">
                 <div className="rounded-xl bg-primary-light p-3 text-primary">
                   <CalendarDays className="h-5 w-5" />
                 </div>
+
                 <div>
                   <h3 className="font-semibold text-text-primary">
                     Scheduled Publishing
                   </h3>
+
                   <p className="mt-1 text-sm leading-5 text-text-secondary">
                     Plan posts ahead of time and manage upcoming publishing
                     activity.
@@ -775,10 +801,12 @@ const handleSchedulePost = () => {
                 <div className="rounded-xl bg-primary-light p-3 text-primary">
                   <Send className="h-5 w-5" />
                 </div>
+
                 <div>
                   <h3 className="font-semibold text-text-primary">
                     Multi-Location Publishing
                   </h3>
+
                   <p className="mt-1 text-sm leading-5 text-text-secondary">
                     Organize content across multiple business locations from
                     one workspace.
@@ -792,10 +820,12 @@ const handleSchedulePost = () => {
                 <div className="rounded-xl bg-primary-light p-3 text-primary">
                   <FileText className="h-5 w-5" />
                 </div>
+
                 <div>
                   <h3 className="font-semibold text-text-primary">
                     Content History
                   </h3>
+
                   <p className="mt-1 text-sm leading-5 text-text-secondary">
                     Keep a clear view of published, scheduled, and draft
                     content.
@@ -806,7 +836,8 @@ const handleSchedulePost = () => {
           </section>
         </div>
       </main>
-            {isCreateOpen && (
+
+      {isCreateOpen && (
         <div className="fixed inset-0 z-50">
           <button
             type="button"
@@ -819,6 +850,7 @@ const handleSchedulePost = () => {
             <div className="flex items-center justify-between border-b border-border px-6 py-5">
               <div>
                 <p className="text-sm text-text-secondary">Management</p>
+
                 <h2 className="mt-1 text-xl font-semibold text-text-primary">
                   Create Post
                 </h2>
@@ -903,11 +935,12 @@ const handleSchedulePost = () => {
                     id="post-content"
                     value={postContent}
                     onChange={(event) => {
-  setPostContent(event.target.value);
-  if (scheduleError) {
-    setScheduleError("");
-  }
-}}
+                      setPostContent(event.target.value);
+
+                      if (scheduleError) {
+                        setScheduleError("");
+                      }
+                    }}
                     placeholder="Write the content you want to publish..."
                     className="mt-2 min-h-44 w-full resize-y rounded-xl border border-border bg-white p-4 text-sm leading-6 text-text-primary outline-none placeholder:text-text-secondary focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
@@ -968,94 +1001,98 @@ const handleSchedulePost = () => {
                     <option>None</option>
                   </select>
                 </section>
-<section className="rounded-2xl bg-secondary/60 p-4">
-  <div className="flex items-start gap-3">
-    <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
 
-    <div className="min-w-0 flex-1">
-      <p className="text-sm font-semibold text-text-primary">
-        Publishing options
-      </p>
+                <section className="rounded-2xl bg-secondary/60 p-4">
+                  <div className="flex items-start gap-3">
+                    <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
 
-      <p className="mt-1 text-xs leading-5 text-text-secondary">
-        Choose when this post should be published. Scheduling is
-        currently a frontend preview.
-      </p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-text-primary">
+                        Publishing options
+                      </p>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div>
-          <label
-            htmlFor="schedule-date"
-            className="text-xs font-semibold text-text-primary"
-          >
-            Schedule Date
-          </label>
+                      <p className="mt-1 text-xs leading-5 text-text-secondary">
+                        Choose when this post should be published. Scheduling
+                        is currently a frontend preview.
+                      </p>
 
-          <input
-            id="schedule-date"
-            type="date"
-            value={scheduleDate}
-            onChange={(event) => {
-  setScheduleDate(event.target.value);
-  if (scheduleError) {
-    setScheduleError("");
-  }
-}}
-            className="mt-2 h-11 w-full rounded-xl border border-border bg-white px-3 text-sm text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
-          />
-        </div>
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        <div>
+                          <label
+                            htmlFor="schedule-date"
+                            className="text-xs font-semibold text-text-primary"
+                          >
+                            Schedule Date
+                          </label>
 
-        <div>
-          <label
-            htmlFor="schedule-time"
-            className="text-xs font-semibold text-text-primary"
-          >
-            Schedule Time
-          </label>
+                          <input
+                            id="schedule-date"
+                            type="date"
+                            value={scheduleDate}
+                            onChange={(event) => {
+                              setScheduleDate(event.target.value);
 
-          <input
-            id="schedule-time"
-            type="time"
-            value={scheduleTime}
-onChange={(event) => {
-  setScheduleTime(event.target.value);
-  if (scheduleError) {
-    setScheduleError("");
-  }
-}}            className="mt-2 h-11 w-full rounded-xl border border-border bg-white px-3 text-sm text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
-          />
-        </div>
-      </div>
+                              if (scheduleError) {
+                                setScheduleError("");
+                              }
+                            }}
+                            className="mt-2 h-11 w-full rounded-xl border border-border bg-white px-3 text-sm text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                          />
+                        </div>
 
-      <div className="mt-3 rounded-xl border border-primary/10 bg-primary-light/50 px-3 py-2.5">
-        <p className="text-xs font-medium text-text-secondary">
-          Scheduled for
-        </p>
+                        <div>
+                          <label
+                            htmlFor="schedule-time"
+                            className="text-xs font-semibold text-text-primary"
+                          >
+                            Schedule Time
+                          </label>
 
-        <p className="mt-1 text-sm font-semibold text-primary">
-          {new Date(`${scheduleDate}T${scheduleTime}`).toLocaleString(
-            "en-US",
-            {
-              weekday: "short",
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-              hour: "numeric",
-              minute: "2-digit",
-            },
-          )}
-        </p>
-      </div>
-    </div>
-  </div>
-  {scheduleError && (
-  <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5">
-    <p className="text-xs font-medium text-red-600">
-      {scheduleError}
-    </p>
-  </div>
-)}
-</section>
+                          <input
+                            id="schedule-time"
+                            type="time"
+                            value={scheduleTime}
+                            onChange={(event) => {
+                              setScheduleTime(event.target.value);
+
+                              if (scheduleError) {
+                                setScheduleError("");
+                              }
+                            }}
+                            className="mt-2 h-11 w-full rounded-xl border border-border bg-white px-3 text-sm text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-3 rounded-xl border border-primary/10 bg-primary-light/50 px-3 py-2.5">
+                        <p className="text-xs font-medium text-text-secondary">
+                          Scheduled for
+                        </p>
+
+                        <p className="mt-1 text-sm font-semibold text-primary">
+                          {new Date(
+                            `${scheduleDate}T${scheduleTime}`,
+                          ).toLocaleString("en-US", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                      </div>
+
+                      {scheduleError && (
+                        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5">
+                          <p className="text-xs font-medium text-red-600">
+                            {scheduleError}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </section>
               </div>
             </div>
 
@@ -1078,13 +1115,14 @@ onChange={(event) => {
                     Save Draft
                   </button>
 
-<button
-  type="button"
-  onClick={handleSchedulePost}
-  className="rounded-xl border border-primary bg-white px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary-light"
->
-  Schedule
-</button>
+                  <button
+                    type="button"
+                    onClick={handleSchedulePost}
+                    className="rounded-xl border border-primary bg-white px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary-light"
+                  >
+                    Schedule
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => setIsCreateOpen(false)}
@@ -1096,6 +1134,124 @@ onChange={(event) => {
               </div>
             </div>
           </aside>
+        </div>
+      )}
+
+      {isSchedulePreviewOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border px-6 py-5">
+              <div>
+                <p className="text-sm text-text-secondary">Publishing</p>
+
+                <h2 className="mt-1 text-xl font-semibold text-text-primary">
+                  Confirm Schedule
+                </h2>
+
+                <p className="mt-1 text-sm text-text-secondary">
+                  Review your post before scheduling it.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsSchedulePreviewOpen(false)}
+                className="rounded-full p-2 text-text-secondary transition-colors hover:bg-secondary hover:text-text-primary"
+                aria-label="Close schedule preview"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-5 px-6 py-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-medium text-text-secondary">
+                    Post Type
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold text-text-primary">
+                    {postType}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-medium text-text-secondary">
+                    Location
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold text-text-primary">
+                    {postLocation}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-text-secondary">
+                  Post Content
+                </p>
+
+                <div className="mt-2 rounded-xl border border-border bg-secondary/40 p-4">
+                  <p className="whitespace-pre-wrap text-sm leading-6 text-text-primary">
+                    {postContent}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-text-secondary">
+                  Call to Action
+                </p>
+
+                <p className="mt-1 text-sm font-semibold text-text-primary">
+                  {callToAction}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-primary/10 bg-primary-light/50 p-4">
+                <div className="flex items-start gap-3">
+                  <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+
+                  <div>
+                    <p className="text-xs font-medium text-text-secondary">
+                      Scheduled For
+                    </p>
+
+                    <p className="mt-1 text-sm font-semibold text-primary">
+                      {new Date(
+                        `${scheduleDate}T${scheduleTime}`,
+                      ).toLocaleString("en-US", {
+                        weekday: "long",
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 border-t border-border px-6 py-5">
+              <button
+                type="button"
+                onClick={() => setIsSchedulePreviewOpen(false)}
+                className="rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-semibold text-text-primary transition hover:bg-secondary"
+              >
+                Back / Edit
+              </button>
+
+              <button
+                type="button"
+                onClick={handleConfirmSchedule}
+                className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark"
+              >
+                Confirm Schedule
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </AppShell>
